@@ -5,8 +5,11 @@ var cookieParser = require('cookie-parser'); // 处理 cookie 的中间件
 var logger = require('morgan'); // HTTP 请求日志记录中间件
 const mongoose = require('mongoose');   // MongoDB ODM 库
 //引入路由
+
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const usersRouter = require('./routes/users');
+const loginRouter = require('./routes/login');
+const ordersRouter = require('./routes/orders');
 var app = express();  //创建了一个 Express 应用实例，这个实例 app 就代表你整个网站 / 后端服务器。
 
 // 🔧 配置 IP、端口等
@@ -33,6 +36,19 @@ const swaggerOptions = {
         url: `http://${config.ip}:${config.port}`,
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: '请输入Bearer token，格式为：Bearer {token}',
+        },
+      },
+    },
+    security: [{
+      bearerAuth: []
+    }],
   },
   apis: ['./routes/*.js'], // 扫描 routes 下所有 js 文件里的注释
 };
@@ -44,12 +60,16 @@ app.listen(config.port, () => {
   console.log(`Swagger文档地址  http://${config.ip}:${config.port}/api-docs`);
 });
 // MongoDB 连接
-mongoose.connect(`mongodb://${config.ip}:${config.mongoPort}/${config.dbName}`, {
+const mongoUrl = `mongodb://${config.ip}:${config.mongoPort}/${config.dbName}`;
+console.log('MongoDB 连接字符串:', mongoUrl); // 加这一行看看真实的连接地址
+
+mongoose.connect(mongoUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
     .then(() => console.log('MongoDB 连接成功'))
     .catch(err => console.error('MongoDB 连接失败:', err));
+
 //设置视图模板
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -61,7 +81,10 @@ app.use(cookieParser());                          // 解析 cookie
 app.use(express.static(path.join(__dirname, 'public'))); // 静态资源路径
 //注册路由
 app.use('/', indexRouter);     // 主路由
-app.use('/users', usersRouter); // 用户相关接口
+app.use('/users', usersRouter);
+app.use('/auth', loginRouter);
+app.use('/orders', ordersRouter);
+
 //404 错误处理
 app.use(function(req, res, next) {
   next(createError(404));

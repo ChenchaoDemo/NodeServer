@@ -1,9 +1,27 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var userSchema = new mongoose.Schema({
-    name: String,
-    email: String,
-    age: Number
+const userSchema = new mongoose.Schema({
+    account: String,
+    password: String,
+    phone: String,
+    gender: String,
+    age: Number,
+}, {
+    toJSON: {
+        transform(doc, ret) {
+            delete ret._id;
+            delete ret.__v;
+            return ret;
+        }
+    },
+    toObject: {
+        transform(doc, ret) {
+            delete ret._id;
+            delete ret.__v;
+            return ret;
+        }
+    }
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+module.exports = User;
