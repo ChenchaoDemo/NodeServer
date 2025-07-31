@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+</head>
+<body>
+<h1><%= title %></h1>
+
+<button id="toggleButton">
+    <%= isRunning ? '关闭定时调用' : '开启定时调用' %>
+</button>
+
+<p>接口调用次数：<span id="callCount"><%= callCount %></span></p>
+
+<script>
+    let isRunning = <%= isRunning %>;
+
+    document.getElementById('toggleButton').addEventListener('click', async () => {
+        const response = await fetch('/toggle-timer', {
+            method: 'POST',
+        });
+        const result = await response.json();
+
+        if (result.status === 'started') {
+            isRunning = true;
+            document.getElementById('toggleButton').textContent = '关闭定时调用';
+        } else {
+            isRunning = false;
+            document.getElementById('toggleButton').textContent = '开启定时调用';
+        }
+    });
+
+    // 定时刷新调用次数
+    setInterval(async () => {
+        if (!isRunning) return;
+        const res = await fetch('/get-call-count');
+        const data = await res.json();
+        document.getElementById('callCount').textContent = data.count;
+    }, 1000);
+</script>
+</body>
+</html>

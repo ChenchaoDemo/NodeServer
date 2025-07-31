@@ -10,6 +10,12 @@ var indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const loginRouter = require('./routes/login');
 const ordersRouter = require('./routes/orders');
+const dailyProductionStatsRouter = require('./routes/dailyProductionStats');
+const energyStatsRouter = require('./routes/energyStats');
+const equipmentStatsRouter = require('./routes/equipmentStats');
+const materialUsageStatsRouter = require('./routes/materialUsageStats');
+const qualityStatsRouter = require('./routes/qualityStats');
+
 var app = express();  //创建了一个 Express 应用实例，这个实例 app 就代表你整个网站 / 后端服务器。
 
 // 🔧 配置 IP、端口等
@@ -72,7 +78,8 @@ mongoose.connect(mongoUrl, {
 
 //设置视图模板
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
+// app.set('view engine', 'pug');
 //中间件注册
 app.use(logger('dev'));                           // 日志中间件
 app.use(express.json());                          // 解析 JSON 请求体
@@ -84,6 +91,11 @@ app.use('/', indexRouter);     // 主路由
 app.use('/users', usersRouter);
 app.use('/auth', loginRouter);
 app.use('/orders', ordersRouter);
+app.use('/daily', dailyProductionStatsRouter);
+app.use('/energy', energyStatsRouter);
+app.use('/equipment', equipmentStatsRouter);
+app.use('/material', materialUsageStatsRouter);
+app.use('/quality', qualityStatsRouter);
 
 //404 错误处理
 app.use(function(req, res, next) {
